@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Student Academic Portal — University API System</title>
+  <!-- Bootstrap 5 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Bootstrap Icons -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- Custom Design System -->
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+  <!-- Backdrop for mobile responsive sidebar -->
+  <div class="sidebar-backdrop"></div>
+
+  <div class="app-container">
+    <!-- Sidebar -->
+    <aside class="app-sidebar">
+      <div class="sidebar-header">
+        <a href="/" class="brand-badge">
+          <div class="brand-icon">
+            <i class="bi bi-mortarboard-fill"></i>
+          </div>
+          <div class="brand-text">
+            <h1>UniAccess</h1>
+            <span>Student Portal</span>
+          </div>
+        </a>
+      </div>
+
+      <nav class="sidebar-nav">
+        <div class="nav-section-title">Academic Records</div>
+        <a href="#sectionMarks" class="nav-link active" data-tab="marks">
+          <i class="bi bi-journal-check"></i> My Academic Marks
+        </a>
+        <a href="#sectionProfile" class="nav-link" data-tab="profile">
+          <i class="bi bi-person-badge"></i> Student Profile
+        </a>
+        <a href="#sectionQuota" class="nav-link" data-tab="quota">
+          <i class="bi bi-speedometer"></i> API Key & Quota
+        </a>
+
+        <div class="nav-section-title mt-4">Other Portals</div>
+        <a href="/settings" class="nav-link">
+          <i class="bi bi-key-fill"></i> Change API Key
+        </a>
+        <a href="/teacher/dashboard" class="nav-link">
+          <i class="bi bi-person-workspace"></i> Teacher Portal
+        </a>
+        <a href="/admin" class="nav-link">
+          <i class="bi bi-shield-lock"></i> Admin Portal
+        </a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="sidebar-user-pill">
+          <div class="user-avatar bg-success text-white" id="sidebarAvatar">ST</div>
+          <div class="overflow-hidden">
+            <div class="text-white small fw-bold text-truncate" id="sidebarStudentName">Student Profile</div>
+            <div class="text-muted" style="font-size: 0.72rem;" id="sidebarStudentNumber">STD-0000-0000</div>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Workspace -->
+    <main class="app-main">
+      <!-- Top Navbar -->
+      <header class="top-navbar">
+        <div class="top-navbar-left">
+          <button class="btn btn-sm btn-outline-secondary d-lg-none" id="sidebarToggleBtn">
+            <i class="bi bi-list fs-5"></i>
+          </button>
+          <div class="page-title">
+            <h2 id="topbarHeaderName">Student Academic Dashboard</h2>
+            <p id="topbarHeaderSub">Identity verified strictly via cryptographic API key headers.</p>
+          </div>
+        </div>
+        <div class="top-navbar-right">
+          <div class="badge bg-success-subtle text-success border border-success-subtle px-3 py-2 rounded-pill small">
+            <i class="bi bi-shield-check me-1"></i> Key-Isolated Session
+          </div>
+          <button class="btn btn-outline-danger btn-sm" id="studentLogoutBtn" title="Disconnect Session">
+            <i class="bi bi-box-arrow-right"></i>
+          </button>
+        </div>
+      </header>
+
+      <!-- Content Body -->
+      <div class="content-body">
+
+        <!-- Quota Alert Banner -->
+        <div class="alert alert-info border-0 shadow-sm d-flex align-items-center justify-content-between p-3 mb-4 rounded-3">
+          <div class="d-flex align-items-center gap-3">
+            <div class="stat-icon info" style="width: 36px; height: 36px;">
+              <i class="bi bi-key-fill"></i>
+            </div>
+            <div>
+              <div class="small fw-bold text-dark">Active API Access Key: <code id="bannerKeyPrefix" class="key-code">uap_student_...</code></div>
+              <small class="text-muted">Quota Usage: <span id="bannerQuotaText" class="fw-semibold">0 / 100</span> calls (<span id="bannerRemainingText">100 remaining</span>)</small>
+            </div>
+          </div>
+          <a href="/settings" class="btn btn-sm btn-outline-primary bg-white">Manage Key</a>
+        </div>
+
+        <!-- Academic Performance Metric Cards -->
+        <div class="row g-3 mb-4">
+          <div class="col-xl-3 col-sm-6">
+            <div class="stat-card">
+              <div class="stat-header">
+                <span class="stat-title">Subjects Enrolled</span>
+                <div class="stat-icon primary"><i class="bi bi-book"></i></div>
+              </div>
+              <div class="stat-value" id="cardTotalSubjects">—</div>
+              <div class="stat-subtext text-muted" id="cardSemesterText">Current Semester</div>
+            </div>
+          </div>
+
+          <div class="col-xl-3 col-sm-6">
+            <div class="stat-card">
+              <div class="stat-header">
+                <span class="stat-title">Obtained Marks</span>
+                <div class="stat-icon success"><i class="bi bi-award"></i></div>
+              </div>
+              <div class="stat-value" id="cardObtainedMarks">—</div>
+              <div class="stat-subtext text-muted" id="cardTotalMaxMarks">Out of — Total</div>
+            </div>
+          </div>
+
+          <div class="col-xl-3 col-sm-6">
+            <div class="stat-card">
+              <div class="stat-header">
+                <span class="stat-title">Percentage</span>
+                <div class="stat-icon info"><i class="bi bi-percent"></i></div>
+              </div>
+              <div class="stat-value" id="cardPercentage">—%</div>
+              <div class="stat-subtext text-muted"><i class="bi bi-graph-up text-success"></i> Academic Score</div>
+            </div>
+          </div>
+
+          <div class="col-xl-3 col-sm-6">
+            <div class="stat-card">
+              <div class="stat-header">
+                <span class="stat-title">Academic Standing</span>
+                <div class="stat-icon warning"><i class="bi bi-star"></i></div>
+              </div>
+              <div class="stat-value text-dark" style="font-size: 1.4rem;" id="cardGradeStanding">—</div>
+              <div class="stat-subtext text-muted">Official Standing</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab 1: Marks View -->
+        <section id="sectionMarks" class="tab-pane-content">
+          <div class="row g-4 mb-4">
+            <!-- Marks Table -->
+            <div class="col-lg-7">
+              <div class="custom-card h-100">
+                <div class="custom-card-header">
+                  <h3 class="custom-card-title">
+                    <i class="bi bi-table text-primary"></i> Subject-Wise Academic Marks
+                  </h3>
+                  <span class="badge bg-light text-muted border">Official University Record</span>
+                </div>
+                <div class="custom-card-body p-0">
+                  <div class="table-responsive">
+                    <table class="table custom-table align-middle mb-0">
+                      <thead>
+                        <tr>
+                          <th>Subject Name</th>
+                          <th>Semester</th>
+                          <th>Total Marks</th>
+                          <th>Obtained</th>
+                          <th>Percentage</th>
+                          <th>Instructor</th>
+                        </tr>
+                      </thead>
+                      <tbody id="studentMarksTableBody">
+                        <tr><td colspan="6" class="text-center py-4 text-muted">Loading marks records...</td></tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Marks Visualization Chart -->
+            <div class="col-lg-5">
+              <div class="custom-card h-100">
+                <div class="custom-card-header">
+                  <h3 class="custom-card-title">
+                    <i class="bi bi-bar-chart-fill text-indigo"></i> Subject Performance Chart
+                  </h3>
+                </div>
+                <div class="custom-card-body d-flex justify-content-center align-items-center" style="min-height: 320px;">
+                  <canvas id="studentPerformanceChart"></canvas>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Tab 2: Profile View -->
+        <section id="sectionProfile" class="tab-pane-content d-none">
+          <div class="custom-card">
+            <div class="custom-card-header">
+              <h3 class="custom-card-title"><i class="bi bi-person-lines-fill text-primary"></i> Verified Student Profile</h3>
+            </div>
+            <div class="custom-card-body p-4">
+              <div class="row g-4">
+                <div class="col-md-6">
+                  <label class="form-label text-muted small">Full Name</label>
+                  <div class="form-control-plaintext fw-bold fs-5" id="profileFullName">—</div>
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label text-muted small">Student Roll Number</label>
+                  <div class="form-control-plaintext"><code class="key-code" id="profileRollNumber">—</code></div>
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label text-muted small">Institutional Email</label>
+                  <div class="form-control-plaintext text-dark" id="profileEmail">—</div>
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label text-muted small">Academic Department</label>
+                  <div class="form-control-plaintext fw-semibold" id="profileDepartment">—</div>
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label text-muted small">Current Semester</label>
+                  <div class="form-control-plaintext"><span class="badge bg-primary-subtle text-primary" id="profileSemester">—</span></div>
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label text-muted small">Enrollment Date</label>
+                  <div class="form-control-plaintext text-muted" id="profileCreatedAt">—</div>
+                </div>
+              </div>
+
+              <div class="alert alert-light border mt-4 small text-muted">
+                <i class="bi bi-info-circle-fill text-primary me-2"></i>
+                <strong>Security Guarantee:</strong> This profile was retrieved with zero client-provided identifiers. The server queried MySQL strictly using the owner mapping extracted from your hashed API key.
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Tab 3: Quota View -->
+        <section id="sectionQuota" class="tab-pane-content d-none">
+          <div class="custom-card">
+            <div class="custom-card-header">
+              <h3 class="custom-card-title"><i class="bi bi-speedometer2 text-warning"></i> API Rate Limiting & Quota Details</h3>
+            </div>
+            <div class="custom-card-body p-4">
+              <div class="row g-4">
+                <div class="col-md-4">
+                  <div class="p-3 bg-light rounded border text-center">
+                    <span class="small text-muted d-block mb-1">Max Request Limit</span>
+                    <strong class="fs-4 text-dark" id="quotaLimitVal">—</strong>
+                    <small class="text-muted d-block">Configured by Admin</small>
+                  </div>
+                </div>
+                <div class="col-md-4">
+                  <div class="p-3 bg-light rounded border text-center">
+                    <span class="small text-muted d-block mb-1">Consumed Requests</span>
+                    <strong class="fs-4 text-primary" id="quotaConsumedVal">—</strong>
+                    <small class="text-muted d-block">Atomically Incremented</small>
+                  </div>
+                </div>
+                <div class="col-md-4">
+                  <div class="p-3 bg-light rounded border text-center">
+                    <span class="small text-muted d-block mb-1">Remaining Calls</span>
+                    <strong class="fs-4 text-success" id="quotaRemainingVal">—</strong>
+                    <small class="text-muted d-block">Before HTTP 429</small>
+                  </div>
+                </div>
+              </div>
+
+              <div class="mt-4">
+                <h6 class="fw-bold mb-2">Quota Consumption Progress</h6>
+                <div class="progress" style="height: 12px;">
+                  <div class="progress-bar bg-primary" id="quotaProgressBar" style="width: 0%"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+      </div>
+    </main>
+  </div>
+
+  <!-- Scripts -->
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="/js/api-client.js"></script>
+  <script src="/js/student.js"></script>
+</body>
+</html>

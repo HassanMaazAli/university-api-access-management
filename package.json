@@ -1,0 +1,30 @@
+{
+  "name": "university-api-system",
+  "version": "1.0.0",
+  "description": "University API Access Management System - Full Stack Lab Assignment",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js",
+    "seed": "node scripts/init-db.js",
+    "test": "node scripts/test-api.js"
+  },
+  "keywords": [
+    "express",
+    "mysql2",
+    "api-keys",
+    "bootstrap5",
+    "jquery",
+    "rbac"
+  ],
+  "author": "FSD Lab Student",
+  "license": "ISC",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.1",
+    "helmet": "^8.0.0",
+    "morgan": "^1.10.0",
+    "mysql2": "^3.11.3"
+  }
+}

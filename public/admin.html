@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard — University API System</title>
+  <!-- Bootstrap 5 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Bootstrap Icons -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- Custom Design System -->
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+  <!-- Backdrop for mobile responsive sidebar -->
+  <div class="sidebar-backdrop"></div>
+
+  <div class="app-container">
+    <!-- Sidebar -->
+    <aside class="app-sidebar">
+      <div class="sidebar-header">
+        <a href="/" class="brand-badge">
+          <div class="brand-icon">
+            <i class="bi bi-shield-check"></i>
+          </div>
+          <div class="brand-text">
+            <h1>UniAccess</h1>
+            <span>Administrator Console</span>
+          </div>
+        </a>
+      </div>
+
+      <nav class="sidebar-nav">
+        <div class="nav-section-title">Navigation</div>
+        <a href="#sectionOverview" class="nav-link active" data-tab="overview">
+          <i class="bi bi-grid-1x2-fill"></i> System Overview
+        </a>
+        <a href="#sectionKeys" class="nav-link" data-tab="keys">
+          <i class="bi bi-key-fill"></i> API Keys Management
+        </a>
+        <a href="#sectionLogs" class="nav-link" data-tab="logs">
+          <i class="bi bi-activity"></i> Audit Request Logs
+        </a>
+        <a href="#sectionDirectory" class="nav-link" data-tab="directory">
+          <i class="bi bi-people-fill"></i> Students & Teachers
+        </a>
+
+        <div class="nav-section-title mt-4">Switch Role</div>
+        <a href="/teacher/dashboard" class="nav-link">
+          <i class="bi bi-person-workspace"></i> Teacher View
+        </a>
+        <a href="/student/dashboard" class="nav-link">
+          <i class="bi bi-mortarboard-fill"></i> Student View
+        </a>
+        <a href="/settings" class="nav-link">
+          <i class="bi bi-gear-fill"></i> Key Settings
+        </a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="sidebar-user-pill">
+          <div class="user-avatar bg-primary text-white">AD</div>
+          <div class="overflow-hidden">
+            <div class="text-white small fw-bold text-truncate" id="sidebarAdminName">System Admin</div>
+            <div class="text-muted" style="font-size: 0.72rem;">admin@university.edu</div>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Workspace -->
+    <main class="app-main">
+      <!-- Top Navbar -->
+      <header class="top-navbar">
+        <div class="top-navbar-left">
+          <button class="btn btn-sm btn-outline-secondary d-lg-none" id="sidebarToggleBtn">
+            <i class="bi bi-list fs-5"></i>
+          </button>
+          <div class="page-title">
+            <h2>Administration Dashboard</h2>
+            <p>Monitor API quotas, generate cryptographically secure keys, and audit university requests.</p>
+          </div>
+        </div>
+        <div class="top-navbar-right">
+          <button class="btn btn-primary btn-sm d-flex align-items-center gap-2" id="openGenerateKeyBtn">
+            <i class="bi bi-plus-lg"></i>
+            <span>Generate New Key</span>
+          </button>
+          <button class="btn btn-outline-danger btn-sm" id="adminLogoutBtn" title="Disconnect admin key">
+            <i class="bi bi-box-arrow-right"></i>
+          </button>
+        </div>
+      </header>
+
+      <!-- Content Body -->
+      <div class="content-body">
+        
+        <!-- Tab 1: System Overview -->
+        <section id="sectionOverview" class="tab-pane-content">
+          <!-- Stat Cards -->
+          <div class="row g-3 mb-4">
+            <div class="col-xl-3 col-sm-6">
+              <div class="stat-card">
+                <div class="stat-header">
+                  <span class="stat-title">Total Students</span>
+                  <div class="stat-icon primary"><i class="bi bi-mortarboard"></i></div>
+                </div>
+                <div class="stat-value" id="statStudents">—</div>
+                <div class="stat-subtext text-muted"><i class="bi bi-check2-circle text-success"></i> Active Enrolled</div>
+              </div>
+            </div>
+
+            <div class="col-xl-3 col-sm-6">
+              <div class="stat-card">
+                <div class="stat-header">
+                  <span class="stat-title">Faculty Teachers</span>
+                  <div class="stat-icon info"><i class="bi bi-person-video3"></i></div>
+                </div>
+                <div class="stat-value" id="statTeachers">—</div>
+                <div class="stat-subtext text-muted"><i class="bi bi-building text-info"></i> Department Staff</div>
+              </div>
+            </div>
+
+            <div class="col-xl-3 col-sm-6">
+              <div class="stat-card">
+                <div class="stat-header">
+                  <span class="stat-title">Active API Keys</span>
+                  <div class="stat-icon success"><i class="bi bi-key"></i></div>
+                </div>
+                <div class="stat-value" id="statActiveKeys">—</div>
+                <div class="stat-subtext text-muted"><span id="statRevokedKeys" class="fw-semibold text-danger">0</span> Revoked</div>
+              </div>
+            </div>
+
+            <div class="col-xl-3 col-sm-6">
+              <div class="stat-card">
+                <div class="stat-header">
+                  <span class="stat-title">Total Requests</span>
+                  <div class="stat-icon warning"><i class="bi bi-graph-up-arrow"></i></div>
+                </div>
+                <div class="stat-value" id="statRequests">—</div>
+                <div class="stat-subtext text-muted"><span id="statLogsCount">0</span> Audit Logged</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Quick Charts / Activity Row -->
+          <div class="row g-4 mb-4">
+            <div class="col-lg-7">
+              <div class="custom-card h-100">
+                <div class="custom-card-header">
+                  <h3 class="custom-card-title"><i class="bi bi-pie-chart text-primary"></i> API Key Allocation by Role</h3>
+                  <span class="badge bg-light text-muted border">Live Distribution</span>
+                </div>
+                <div class="custom-card-body d-flex justify-content-center align-items-center" style="min-height: 280px;">
+                  <div style="width: 260px; height: 260px;">
+                    <canvas id="keysDistributionChart"></canvas>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-lg-5">
+              <div class="custom-card h-100">
+                <div class="custom-card-header">
+                  <h3 class="custom-card-title"><i class="bi bi-clock-history text-indigo"></i> Recent API Activity</h3>
+                  <button class="btn btn-link btn-sm p-0 text-decoration-none" onclick="navigateToTab('logs')">View All</button>
+                </div>
+                <div class="custom-card-body p-0">
+                  <div class="table-responsive">
+                    <table class="table custom-table mb-0">
+                      <thead>
+                        <tr>
+                          <th>Method</th>
+                          <th>Endpoint</th>
+                          <th>Status</th>
+                          <th>Time</th>
+                        </tr>
+                      </thead>
+                      <tbody id="recentActivityTable">
+                        <tr><td colspan="4" class="text-center py-4 text-muted">Loading live requests...</td></tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Tab 2: API Keys Management -->
+        <section id="sectionKeys" class="tab-pane-content d-none">
+          <div class="custom-card">
+            <div class="custom-card-header flex-wrap gap-2">
+              <h3 class="custom-card-title">
+                <i class="bi bi-shield-lock text-primary"></i> Managed API Keys
+              </h3>
+              <button class="btn btn-primary btn-sm" id="btnOpenNewKeyModal">
+                <i class="bi bi-key me-1"></i> Generate API Key
+              </button>
+            </div>
+            <div class="custom-card-body">
+              <!-- Filter Bar -->
+              <div class="filter-bar">
+                <div class="search-input-group">
+                  <i class="bi bi-search"></i>
+                  <input type="text" id="keySearchInput" class="form-control" placeholder="Search by name, key prefix, or owner...">
+                </div>
+                <select id="keyRoleFilter" class="form-select" style="max-width: 170px;">
+                  <option value="">All Roles</option>
+                  <option value="student">Student Keys</option>
+                  <option value="teacher">Teacher Keys</option>
+                  <option value="admin">Admin Keys</option>
+                </select>
+                <select id="keyStatusFilter" class="form-select" style="max-width: 170px;">
+                  <option value="">All Statuses</option>
+                  <option value="active">Active Only</option>
+                  <option value="revoked">Revoked Only</option>
+                </select>
+                <button class="btn btn-outline-secondary btn-sm" id="btnRefreshKeys" title="Refresh Table">
+                  <i class="bi bi-arrow-clockwise"></i>
+                </button>
+              </div>
+
+              <!-- Keys Table -->
+              <div class="table-responsive">
+                <table class="table custom-table align-middle">
+                  <thead>
+                    <tr>
+                      <th>Key Name & Prefix</th>
+                      <th>Owner / Entity</th>
+                      <th>Role</th>
+                      <th>Usage / Limit</th>
+                      <th>Status</th>
+                      <th>Created</th>
+                      <th>Last Used</th>
+                      <th class="text-end">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody id="apiKeysTableBody">
+                    <tr><td colspan="8" class="text-center py-4 text-muted">Loading managed API keys...</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Tab 3: Audit Request Logs -->
+        <section id="sectionLogs" class="tab-pane-content d-none">
+          <div class="custom-card">
+            <div class="custom-card-header flex-wrap gap-2">
+              <h3 class="custom-card-title">
+                <i class="bi bi-journal-code text-info"></i> API Request Audit Logs
+              </h3>
+              <span class="badge bg-secondary-subtle text-secondary" id="totalLogsBadge">0 Logs</span>
+            </div>
+            <div class="custom-card-body">
+              <div class="filter-bar">
+                <div class="search-input-group">
+                  <i class="bi bi-search"></i>
+                  <input type="text" id="logSearchInput" class="form-control" placeholder="Search by endpoint, key prefix...">
+                </div>
+                <select id="logStatusFilter" class="form-select" style="max-width: 170px;">
+                  <option value="">All Statuses</option>
+                  <option value="200">200 OK</option>
+                  <option value="201">201 Created</option>
+                  <option value="400">400 Bad Request</option>
+                  <option value="401">401 Unauthorized</option>
+                  <option value="403">403 Forbidden</option>
+                  <option value="429">429 Rate Limit</option>
+                  <option value="500">500 Server Error</option>
+                </select>
+                <select id="logMethodFilter" class="form-select" style="max-width: 140px;">
+                  <option value="">All Methods</option>
+                  <option value="GET">GET</option>
+                  <option value="POST">POST</option>
+                  <option value="PATCH">PATCH</option>
+                </select>
+                <button class="btn btn-outline-secondary btn-sm" id="btnRefreshLogs" title="Refresh Logs">
+                  <i class="bi bi-arrow-clockwise"></i>
+                </button>
+              </div>
+
+              <div class="table-responsive">
+                <table class="table custom-table align-middle">
+                  <thead>
+                    <tr>
+                      <th>Time</th>
+                      <th>Method</th>
+                      <th>Endpoint</th>
+                      <th>Status Code</th>
+                      <th>Key Prefix</th>
+                      <th>Owner Type</th>
+                    </tr>
+                  </thead>
+                  <tbody id="logsTableBody">
+                    <tr><td colspan="6" class="text-center py-4 text-muted">Loading audit logs...</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Tab 4: Students & Teachers Directory -->
+        <section id="sectionDirectory" class="tab-pane-content d-none">
+          <div class="row g-4">
+            <!-- Students Column -->
+            <div class="col-lg-6">
+              <div class="custom-card h-100">
+                <div class="custom-card-header">
+                  <h3 class="custom-card-title"><i class="bi bi-mortarboard text-primary"></i> Students Directory</h3>
+                  <span class="badge bg-primary-subtle text-primary" id="studentCountBadge">0 Students</span>
+                </div>
+                <div class="custom-card-body">
+                  <div class="mb-3">
+                    <input type="text" id="studentDirSearch" class="form-control form-control-sm" placeholder="Search student name, roll number...">
+                  </div>
+                  <div class="table-responsive" style="max-height: 420px;">
+                    <table class="table custom-table table-sm">
+                      <thead>
+                        <tr>
+                          <th>Roll No</th>
+                          <th>Full Name</th>
+                          <th>Department</th>
+                          <th>Sem</th>
+                        </tr>
+                      </thead>
+                      <tbody id="studentsDirTableBody">
+                        <tr><td colspan="4" class="text-center py-3 text-muted">Loading students...</td></tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Teachers Column -->
+            <div class="col-lg-6">
+              <div class="custom-card h-100">
+                <div class="custom-card-header">
+                  <h3 class="custom-card-title"><i class="bi bi-person-workspace text-purple"></i> Teachers Directory</h3>
+                  <span class="badge bg-info-subtle text-info" id="teacherCountBadge">0 Teachers</span>
+                </div>
+                <div class="custom-card-body">
+                  <div class="mb-3">
+                    <input type="text" id="teacherDirSearch" class="form-control form-control-sm" placeholder="Search teacher name, employee number...">
+                  </div>
+                  <div class="table-responsive" style="max-height: 420px;">
+                    <table class="table custom-table table-sm">
+                      <thead>
+                        <tr>
+                          <th>Teacher ID</th>
+                          <th>Full Name</th>
+                          <th>Department</th>
+                          <th>Email</th>
+                        </tr>
+                      </thead>
+                      <tbody id="teachersDirTableBody">
+                        <tr><td colspan="4" class="text-center py-3 text-muted">Loading teachers...</td></tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+      </div>
+    </main>
+  </div>
+
+  <!-- ================= MODALS ================= -->
+
+  <!-- 1. Generate Key Modal -->
+  <div class="modal fade" id="generateKeyModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content border-0 shadow-lg">
+        <div class="modal-header bg-light">
+          <h5 class="modal-title fw-bold"><i class="bi bi-key-fill text-primary me-2"></i>Generate New API Key</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body p-4">
+          <form id="generateKeyForm">
+            <div class="mb-3">
+              <label class="form-label fw-semibold">Target Entity / Role <span class="text-danger">*</span></label>
+              <select class="form-select" id="newKeyOwnerType" required>
+                <option value="student">Student</option>
+                <option value="teacher">Teacher / Faculty</option>
+                <option value="admin">Administrator</option>
+              </select>
+            </div>
+
+            <div class="mb-3" id="ownerSelectContainer">
+              <label class="form-label fw-semibold">Select Specific Person <span class="text-danger">*</span></label>
+              <select class="form-select" id="newKeyOwnerId" required>
+                <option value="">Select recipient...</option>
+              </select>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label fw-semibold">Key Name / Description</label>
+              <input type="text" class="form-control" id="newKeyName" placeholder="e.g. Mobile App Key, Lab 3 Assignment Key">
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label fw-semibold">Request Limit (Quota) <span class="text-danger">*</span></label>
+              <input type="number" class="form-control" id="newKeyLimit" value="100" min="1" max="100000" required>
+              <small class="text-muted">Total number of HTTP requests allowed before triggering HTTP 429.</small>
+            </div>
+
+            <div class="d-flex justify-content-end gap-2 mt-4">
+              <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+              <button type="submit" class="btn btn-primary" id="btnSubmitGenerateKey">
+                <i class="bi bi-plus-circle me-1"></i> Generate Cryptographic Key
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. Show Key Reveal Modal (Shown ONCE with copy button) -->
+  <div class="modal fade" id="keyRevealModal" tabindex="-1" data-bs-backdrop="static" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content border-0 shadow-lg">
+        <div class="modal-header bg-success-subtle text-success">
+          <h5 class="modal-title fw-bold"><i class="bi bi-check-circle-fill me-2"></i>API Key Generated Successfully</h5>
+        </div>
+        <div class="modal-body p-4 text-center">
+          <div class="alert alert-warning text-start mb-3 small d-flex gap-2">
+            <i class="bi bi-exclamation-triangle-fill fs-5 text-warning flex-shrink-0"></i>
+            <div>
+              <strong>Important Security Warning:</strong> This plaintext API key is shown <strong>only once</strong> and cannot be retrieved again from the database (only its SHA-256 hash is saved). Copy and save it now!
+            </div>
+          </div>
+
+          <div class="key-reveal-box text-start my-3 position-relative">
+            <div id="revealedKeyText" class="pe-5 text-break"></div>
+            <button class="btn btn-sm btn-outline-light copy-btn" id="copyRevealedKeyBtn">
+              <i class="bi bi-clipboard"></i> Copy
+            </button>
+          </div>
+
+          <p class="small text-muted mb-0">Use this key in the <code class="key-code">x-api-key</code> request header for all subsequent API requests.</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-primary w-100" data-bs-dismiss="modal">
+            I Have Copied & Saved My Key
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. Update Request Limit Modal -->
+  <div class="modal fade" id="updateLimitModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content border-0 shadow-lg">
+        <div class="modal-header bg-light">
+          <h5 class="modal-title fw-bold"><i class="bi bi-sliders text-primary me-2"></i>Update Request Limit</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body p-4">
+          <input type="hidden" id="editKeyId">
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Key Identifier</label>
+            <input type="text" class="form-control-plaintext text-muted" id="editKeyPrefix" readonly>
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-semibold">New Request Limit</label>
+            <input type="number" class="form-control" id="editKeyLimitInput" min="1" max="1000000" required>
+            <small class="text-muted">Current count will be preserved; quota expands or contracts.</small>
+          </div>
+          <div class="d-flex justify-content-end gap-2 mt-4">
+            <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+            <button type="button" class="btn btn-primary" id="btnSaveLimit">Save New Limit</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. Revoke Key Confirmation Modal -->
+  <div class="modal fade" id="revokeConfirmModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content border-0 shadow-lg">
+        <div class="modal-header bg-danger-subtle text-danger">
+          <h5 class="modal-title fw-bold"><i class="bi bi-exclamation-triangle-fill me-2"></i>Confirm Key Revocation</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body p-4">
+          <input type="hidden" id="revokeKeyId">
+          <p class="mb-2">Are you sure you want to immediately revoke the following API key?</p>
+          <div class="p-3 bg-light rounded border mb-3">
+            <div class="fw-bold" id="revokeKeyName">—</div>
+            <code class="text-muted small" id="revokeKeyPrefix">—</code>
+          </div>
+          <p class="text-danger small mb-0">
+            <i class="bi bi-x-circle-fill me-1"></i> This action is permanent. Any client using this key will immediately receive <strong>HTTP 403 Forbidden</strong>.
+          </p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+          <button type="button" class="btn btn-danger" id="btnConfirmRevoke">Revoke Key Now</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="/js/api-client.js"></script>
+  <script src="/js/admin.js"></script>
+</body>
+</html>
